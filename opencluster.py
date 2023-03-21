@@ -1,12 +1,13 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import math
+import numpy as np
 input_csv  = "M67_gaia_dr3.csv"
 output_cmd = "M67_gaia_dr3_cmd.png"
 output_astrometry ="M67_gaia_dr3_mem.png" 
 
 cl = pd.read_csv(input_csv)
-
-print(list(cl.columns))
+#print(list(cl.columns))
 
 plt.rcParams['figure.figsize'] = [20, 20]
 
@@ -16,9 +17,9 @@ plt.scatter(cl.bp_rp, # X
         cl.phot_g_mean_mag, #Y
         marker = 's', # point type
         s = 0.1, # point size
-        c = cl.phot_g_mean_flux_error, # color = g Flux(not mag!) error
-        vmin = 0, vmax = 9000, # set error range to show in color bar
-        cmap = 'nipy_spectral') 
+        c = cl.bp_rp, # color = bp_rp
+        vmin = 0, vmax = 2, # set color bar as X axis color
+        cmap = 'jet') 
 plt.xlim(0,3) # X axis range 
 plt.ylim(22,6) # Y axis range
 plt.xlabel('Bp - Rp') 
@@ -39,7 +40,6 @@ plt.ylim(-20,10)
 plt.xlabel('Proper Motion in R.A.')
 plt.ylabel('Proper Motion in Dec.')
 plt.colorbar()
-
 
 # Draw R.A. Proper Motion - Distance diagram
 cl['distance'] = 1000/cl['parallax'] # Add Distance (in pc) column
@@ -91,8 +91,6 @@ plt.ylim(0,50)
 plt.xlabel('Proper Motion in Dec.')
 plt.colorbar()
 
-
-
 # Draw Distance - Radial Velocity diagram
 plt.subplot(3,3,4)
 plt.scatter(cl.distance,
@@ -106,7 +104,6 @@ plt.ylim(0,50)
 plt.xlabel('Distance (pc)')
 plt.ylabel('Radial Velocity')
 plt.colorbar()
-
 
 # Draw R.A. Radial Velocity - Distance Diagram
 plt.subplot(3,3,1)
@@ -122,5 +119,23 @@ plt.ylabel('Distance (pc)')
 plt.xlabel('Radial Velocity')
 plt.colorbar()
 
+# Draw Spatial Potioin map(R.A. - Dec. map)
+cl['mag_scale'] = (14-cl['phot_g_mean_mag'])*25
+cl.loc[cl['mag_scale'] > 100, 'mag_scale']=100
+cl.loc[cl['mag_scale'] < 0.01, 'mag_scale']=0.01
+cl.loc[cl['phot_g_mean_mag'] < 10, 'mag_scale']=100
+#print(cl[['phot_g_mean_mag','mag_scale']])
+plt.subplot(3,3,9)
+plt.scatter(cl.ra,
+        cl.dec,
+        s = cl.mag_scale,
+        c = cl.bp_rp,
+        vmin = 0,
+        vmax = 2,
+        cmap='jet')
+plt.ylabel('R.A.')
+plt.xlabel('Dec.')
+plt.colorbar()
 
+# Save gifure as a file
 plt.savefig(output_cmd)
