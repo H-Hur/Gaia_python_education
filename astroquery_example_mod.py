@@ -24,7 +24,7 @@ output = "M67_gaia_dr3.csv"
 # cal RA, DEC in degree
 ra = 15*(ra1 + ra2/60 + ra3/3600)
 dec = dec1 + dec2/60 + dec3/3600
-if dec < 0: dec = dec1 - dec2/60 - dec3/3600
+if dec1 < 0: dec = dec1 - dec2/60 - dec3/3600
 fov = 0.5 # in degree
 
 print(ra,dec,fov)
