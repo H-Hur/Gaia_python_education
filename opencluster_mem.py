@@ -1,8 +1,10 @@
 #import opencluster_draw as od
 import matplotlib.pyplot as plt
 import pandas as pd
-input_csv  = "NGC2362.csv" # 자료 다운로드 받은 파일 이름
-output_group ="N2362_mem.png" # 분류 결과 확인할 그림파일 이름
+#input_csv  = "NGC2362.csv" # 자료 다운로드 받은 파일 이름
+#output_group ="N2362_mem.png" # 분류 결과 확인할 그림파일 이름
+input_csv  = "M67_gaia_dr3.csv" # 자료 다운로드 받은 파일 이름
+output_group ="M67_gaia_dr3_cmd.png" # 분류 결과 확인할 그림파일 이름
 
 cl = pd.read_csv(input_csv)
 
@@ -32,12 +34,20 @@ print(cl_filt2.isnull().sum())
 from sklearn.mixture import GaussianMixture
 
 # GMM 모델에 사용할 열 고르기: 적경 고유운동, 적위 고유운동, 연주시차
-cl_filt3 = cl_filt2[['pmra','pmdec','parallax']]
+cl_filt2['distance'] = 1000/cl_filt2['parallax'] # Add Distance (in pc) column
+cl_filt3 = cl_filt2[['pmra','pmdec','distance']]
 #print(cl_filt3)
 # GMM: n_components = 모델의 총 수
 # n_comppnents: 별을 몇 개 그룹으로 분류할 것인디
-gmm = GaussianMixture(n_components=4, random_state=0)
+gmm = GaussianMixture(n_components=2, random_state=0)
 gmm.fit(cl_filt3)
+
+print(gmm.weights_) # Component 별 비율
+print(gmm.means_) # Component별 평균값
+print(gmm.covariances_)
+print(gmm.converged_) # fitting 결과가 수렴했는지 여부
+print(gmm.n_iter_) # Fitting 반복 횟수
+
 labels = gmm.predict(cl_filt3)
 cl_filt3["group"] = labels
 #print(len(cl_filt3.loc[cl_filt3['group'] == 0]))
@@ -82,7 +92,6 @@ plt.ylabel('Proper Motion in Dec.')
 plt.colorbar()
 
 # Draw R.A. Proper Motion - Distance diagram
-cl_filt2['distance'] = 1000/cl_filt2['parallax'] # Add Distance (in pc) column
 plt.subplot(3,3,2) 
 plt.scatter(cl_filt2.pmra,
         cl_filt2.distance,
@@ -160,10 +169,13 @@ plt.xlabel('Radial Velocity')
 plt.colorbar()
 
 # Draw Spatial Potioin map(R.A. - Dec. map)
-cl['mag_scale'] = (14-cl['phot_g_mean_mag'])*25
-cl_filt2.loc[cl['mag_scale'] > 100, 'mag_scale']=100
-cl_filt2.loc[cl['mag_scale'] < 0.01, 'mag_scale']=0.01
-cl_filt2.loc[cl['phot_g_mean_mag'] < 10, 'mag_scale']=100
+#cl['mag_scale'] = (14-cl['phot_g_mean_mag'])*25
+#cl['mag_scale'] = 0.1
+#cl_filt2['mag_scale'] = -0.01/(cl_filt2['phot_g_mean_mag']-17)+1
+cl_filt2['mag_scale'] = 20*(1+(-cl_filt2['phot_g_mean_mag']+8)/7)
+#cl_filt2.loc[cl_filt2['mag_scale'] > 100, 'mag_scale']=100
+#cl_filt2.loc[cl_filt2['mag_scale'] < 0.01, 'mag_scale']=0.01
+#cl_filt2.loc[cl_filt2['phot_g_mean_mag'] < 10, 'mag_scale']=100
 #print(cl[['phot_g_mean_mag','mag_scale']])
 plt.subplot(3,3,9)
 plt.scatter(cl_filt2.ra,
@@ -171,8 +183,8 @@ plt.scatter(cl_filt2.ra,
         s = cl_filt2.mag_scale,
         c = cl_filt3.group,
         cmap='jet')
-plt.ylabel('R.A.')
-plt.xlabel('Dec.')
+plt.xlabel('R.A.')
+plt.ylabel('Dec.')
 plt.colorbar()
 
 # Save gifure as a file
