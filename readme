@@ -1,16 +1,15 @@
-1. modify "astroquery_example_mod.py" to download data
- - insert R.A. and Dec.: ra1:ra2:ra3 & dec1:dedc2:dec3
+1. modify "astroquery_example_mod.py" for downloading data
+ - insert R.A. and Dec.: ra1(h):ra2(m):ra3(s) & dec1(d):dec2(m):dec3(s)
  - insert output file name(csv file)
- - insert fov 
+ - insert fov(Field of View) in degree
 2. run "astroquery_example_mod.py": the output file will be generated.
 3. modify "opencluster_mem.py" to check X,Y ranges of diagrams and number of
 groups
  - replace input_csv as the output file name(csv file) set in #1
  - insert output_group file name
- - you may change the GMM part
 4. run "opencluster_mem.py" 
  - modify the X and Y axis ranges and run again, until all diagrams seems good
-5. modify "opencluster_mem.py" to adjust the GMM clusering
+5. modify "opencluster_mem.py" for better running the GMM clusering
  - modify n_components as seen in pmra(X) - pmdec(Y) diagram.
  - if the GMM model cannot fit the source distribution in the diagram, change
    n_components and run again until the model select cluster sources well.
