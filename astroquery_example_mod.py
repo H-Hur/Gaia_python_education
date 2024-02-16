@@ -1,16 +1,12 @@
 #ASYNCHRONOUS REQUEST Example from Gaia website
 
-#Python 3
 import http.client as httplib
 import urllib.parse as urllib
 import time
 from xml.dom.minidom import parseString
 
-host = "gea.esac.esa.int"
-port = 443
-pathinfo = "/tap-server/tap/async"
-
-# Equtorial Coordinates in HMS, DMS
+#------------- Input Part -----------------
+# Target Equtorial Coordinates in HMS, DMS
 ra1 = 8    # hour
 ra2 = 51   # arcmin
 ra3 = 23   # arcsec
@@ -19,19 +15,25 @@ dec2 = 48   # minute
 dec3 = 5   # second
 
 # Set Field of view from the coordinates to search sources 
-fov = 0.5 # in degree, 
+fov = 0.5 # Source searching radius in degree
 
 # Set output csv file name 
-output = "M67_gaia_dr3.csv"
+output = "M67_gaia_dr3.csv" 
+#----------------------------------------
 
-# cal RA, DEC in degree
+# Gaia server
+host = "gea.esac.esa.int"
+port = 443
+pathinfo = "/tap-server/tap/async"
+
+# Calculation part of RA, DEC to convert in degree
 ra = 15*(ra1 + ra2/60 + ra3/3600)
 dec = dec1 + dec2/60 + dec3/3600
 if dec1 < 0: dec = dec1 - dec2/60 - dec3/3600
 
 print(ra,dec,fov)
 print(str(ra),str(dec),str(fov))
-#-------------------------------------
+#Request part-------------------------------------
 #Create job
 
 params = urllib.urlencode({\
@@ -89,7 +91,7 @@ while True:
 connection.close()
 
 #-------------------------------------
-#Get results
+#Get results and write 
 connection = httplib.HTTPSConnection(host, port)
 connection.request("GET",pathinfo+"/"+jobid+"/results/result")
 response = connection.getresponse()
